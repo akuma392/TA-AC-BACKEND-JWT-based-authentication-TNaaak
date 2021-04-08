@@ -5,7 +5,9 @@ var Book = require('../models/book');
 var Comment = require('../models/comment');
 var auth = require('../middleware/auth');
 
-router.get('/', auth.verifyToken, (req, res, next) => {
+router.use(auth.verifyToken);
+router.get('/', (req, res, next) => {
+  console.log(req.user, 'verify token');
   Book.find({})
     .populate('comments')
     .exec((err, book) => {
