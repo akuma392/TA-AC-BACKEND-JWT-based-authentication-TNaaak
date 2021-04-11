@@ -15,11 +15,4 @@ module.exports = {
       return error;
     }
   },
-  loggedInUser: (req, res, next) => {
-    if (req.user && req.user.token) {
-      next();
-    } else {
-      res.json({ error: 'User is not logged in' });
-    }
-  },
 };
