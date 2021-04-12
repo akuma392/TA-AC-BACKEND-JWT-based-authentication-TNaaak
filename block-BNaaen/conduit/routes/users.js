@@ -6,12 +6,13 @@ var auth = require('../middleware/auth');
 /* GET users listing. */
 router.get('/', auth.verifyToken, async function (req, res, next) {
   var { email, userId } = req.user;
+  var token = req.user.token;
   console.log(email, userId);
   // console.log(req.user);
   try {
     var user = await User.findById(userId);
     console.log(user, 'userrrrrrrrrr');
-    res.json({ user: user });
+    res.json({ user: user.userJSON(token) });
   } catch (error) {
     next(error);
   }

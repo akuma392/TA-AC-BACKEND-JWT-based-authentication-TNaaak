@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var articleRouter = require('./routes/articles');
 var profileRouter = require('./routes/profile');
+var tagRouter = require('./routes/tags');
 
 mongoose.connect(
   'mongodb://localhost/conduit',
@@ -34,6 +35,7 @@ app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/profiles', profileRouter);
 app.use('/api/articles', articleRouter);
+app.use('/api/tags', tagRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

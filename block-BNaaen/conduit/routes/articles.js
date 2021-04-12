@@ -19,6 +19,33 @@ router.post('/', auth.verifyToken, async (req, res, next) => {
   }
 });
 
+// update article
+
+router.put('/:slug', auth.verifyToken, async (req, res, next) => {
+  let slug = req.params.slug;
+
+  try {
+    var article = await Article.findOne({ slug: slug });
+
+    if (req.user.userId == article.author) {
+      var updatedArticle = await Article.findOneAndUpdate(
+        { slug: slug },
+        req.body.article
+      );
+      console.log(article);
+      res.json({
+        article: updatedArticle,
+      });
+    } else {
+      res.status(400).json({
+        error: 'You are not authorized to update',
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 // create comments
 
 router.post('/:slug/comments', auth.verifyToken, async (req, res, next) => {
@@ -44,6 +71,8 @@ router.post('/:slug/comments', auth.verifyToken, async (req, res, next) => {
     next(error);
   }
 });
+
+// all articles
 router.get('/', async (req, res, next) => {
   console.log('hello', req.url);
   try {
@@ -58,4 +87,59 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// single article using slug
+
+router.get('/:slug', async (req, res, next) => {
+  let slug = req.params.slug;
+
+  try {
+    var article = await Article.findOne({ slug: slug }).populate('comments');
+    res.json({
+      article: article,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// list all comments of article
+router.get('/:slug/comments', async (req, res, next) => {
+  let slug = req.params.slug;
+
+  try {
+    var article = await Article.findOne({ slug: slug });
+
+    var comments = await Comment.find({ articleId: article._id }).populate(
+      'author',
+      '_id name bio email username image'
+    );
+    res.json({
+      comments: comments,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// delete article
+
+router.delete('/:slug', auth.verifyToken, async (req, res, next) => {
+  let slug = req.params.slug;
+  let userId = req.user.userId;
+
+  try {
+    var article = await Article.findOne({ slug: slug });
+
+    if (userId == article.author) {
+      var deletedArticle = await Article.findOneAndDelete({ slug: slug });
+      var comments = await Comment.deleteMany({ articleId: article._id });
+    } else {
+      return res.json(400).json({
+        error: 'You are not authorized',
+      });
+    }
+  } catch (error) {
+    return next(error);
+  }
+});
 module.exports = router;
