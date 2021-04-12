@@ -11,6 +11,8 @@ var articleSchema = new Schema(
     tagList: [String],
     favoorited: { type: Boolean, default: false },
     favoritesCount: { type: Number, default: 0 },
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
+    favouritedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     author: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }

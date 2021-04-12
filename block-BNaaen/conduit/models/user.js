@@ -11,6 +11,10 @@ var userSchema = new Schema(
     password: { type: String, require: true },
     bio: String,
     image: String,
+    following: { type: Boolean, default: false },
+    followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    followings: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    favourites: [{ type: Schema.Types.ObjectId, ref: 'Article' }],
   },
   { timestamps: true }
 );
