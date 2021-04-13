@@ -11,7 +11,7 @@ var userSchema = new Schema(
     password: { type: String, require: true },
     bio: String,
     image: String,
-    following: { type: Boolean, default: false },
+
     followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     followings: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     favourites: [{ type: Schema.Types.ObjectId, ref: 'Article' }],
@@ -48,7 +48,14 @@ userSchema.methods.userJSON = function (token) {
     name: this.name,
     email: this.email,
     bio: this.bio,
-    token: token,
+  };
+};
+userSchema.methods.userJSON1 = function (user) {
+  return {
+    name: this.name,
+    email: this.email,
+    bio: this.bio,
+    following: user ? user.followings.includes(this._id) : false,
   };
 };
 

@@ -162,20 +162,22 @@ router.get('/:slug/comments', async (req, res, next) => {
 router.post('/:slug/favorite', auth.verifyToken, async (req, res, next) => {
   let slug = req.params.slug;
   let loggedinUser = req.user.userId;
+  var user = await User.findById(loggedinUser);
 
   try {
-    var article = await Article.findOne({ slug: slug }).populate(
-      'author',
-      'username bio image following'
-    );
+    var article = await Article.findOne({ slug: slug })
+      .populate('author', 'username bio image following')
+      .exec();
+
+    console.log(article, 'textttttttttttttttttttt');
     if (!article.favouritedBy.includes(loggedinUser)) {
       article.favouritedBy.push(loggedinUser);
-      article.favoorited = true;
+
       article.favoritesCount += 1;
       article.save();
-
+      article.favourite = true;
       res.json({
-        article: article,
+        article: article.toJSONFor(user),
       });
     }
   } catch (error) {
@@ -188,20 +190,20 @@ router.post('/:slug/favorite', auth.verifyToken, async (req, res, next) => {
 router.delete('/:slug/favorite', auth.verifyToken, async (req, res, next) => {
   let slug = req.params.slug;
   let loggedinUser = req.user.userId;
+  var user = await User.findById(loggedinUser);
 
   try {
-    var article = await Article.findOne({ slug: slug }).populate(
-      'author',
-      'username bio image following'
-    );
+    var article = await Article.findOne({ slug: slug })
+      .populate('author', 'username bio image following')
+      .exec();
     if (article.favouritedBy.includes(loggedinUser)) {
       article.favouritedBy.pull(loggedinUser);
-      article.favoorited = false;
+
       article.favoritesCount -= 1;
       article.save();
-
+      article.favourite = false;
       res.json({
-        article: article,
+        article: article.toJSONFor(user),
       });
     }
   } catch (error) {
