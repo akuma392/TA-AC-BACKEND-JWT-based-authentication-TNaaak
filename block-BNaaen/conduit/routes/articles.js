@@ -3,6 +3,7 @@ var router = express.Router();
 var auth = require('../middleware/auth');
 var Article = require('../models/article');
 var Comment = require('../models/comment');
+var User = require('../models/user');
 
 // create article
 
@@ -74,14 +75,32 @@ router.post('/:slug/comments', auth.verifyToken, async (req, res, next) => {
 
 // all articles
 router.get('/', async (req, res, next) => {
-  console.log('hello', req.url);
+  var query = {};
+  var limit = +req.query.limit || 20;
+  var offset = +req.query.offset || 0;
+
+  if (req.query.author) {
+    var username = req.query.author;
+    var user = await User.findOne({ username });
+    query.author = user._id;
+  }
+  if (req.query.favourited) {
+    console.log(req.query.favourited);
+    var username = req.query.favourited;
+    var user = await User.findOne({ username });
+    console.log(user);
+    query._id = { $in: user.favourites };
+  }
+  if (req.query.tag) {
+    var tag = req.query.tag;
+    query.tagList = tag;
+  }
+  console.log(query);
   try {
-    var articles = await Article.find()
-      .populate('author', 'username bio image')
-      .populate('comments');
-    res.json({
-      articles: articles,
-    });
+    var articles = await Article.find(query)
+      .sort({ createdAt: -1 })
+      .populate('author', 'username bio image');
+    res.json({ articles }).limit(limit).skip(offset);
   } catch (error) {
     next(error);
   }
