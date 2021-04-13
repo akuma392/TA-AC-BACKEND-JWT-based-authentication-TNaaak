@@ -32,18 +32,17 @@ router.post('/:username/follow', auth.verifyToken, async (req, res, next) => {
     var loggedinUser = await User.findOne({ _id: loggedinUserId });
     var userToBeUpdated = await User.findOne({ username });
     var followersList = userToBeUpdated.followers;
-
+    console.log(userToBeUpdated, 'testttttttt');
     if (!followersList.includes(loggedinUserId)) {
       userToBeUpdated.followers.push(loggedinUserId);
 
       userToBeUpdated.save();
-      userToBeUpdated.following = true;
     }
     if (!loggedinUser.followings.includes(userToBeUpdated._id)) {
       loggedinUser.followings.push(userToBeUpdated._id);
       loggedinUser.save();
     }
-    res.json({ profile: userToBeUpdated });
+    res.json({ profile: loggedinUser.followingJSON(userToBeUpdated) });
   } catch (error) {
     next(error);
   }
@@ -55,19 +54,19 @@ router.delete('/:username/follow', auth.verifyToken, async (req, res, next) => {
     var loggedinUserId = req.user.userId;
     var loggedinUser = await User.findOne({ _id: loggedinUserId });
     var userToBeUpdated = await User.findOne({ username });
+    console.log(userToBeUpdated, 'testttttttt');
 
     var followersList = userToBeUpdated.followers;
     if (followersList.includes(req.user.userId)) {
       userToBeUpdated.followers.pull(req.user.userId);
 
       userToBeUpdated.save();
-      userToBeUpdated.following = false;
     }
     if (loggedinUser.followings.includes(userToBeUpdated._id)) {
       loggedinUser.followings.pull(userToBeUpdated._id);
       loggedinUser.save();
     }
-    res.json({ profile: userToBeUpdated });
+    res.json({ profile: loggedinUser.followingJSON(userToBeUpdated) });
   } catch (error) {
     next(error);
   }

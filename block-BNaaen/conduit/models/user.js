@@ -48,6 +48,7 @@ userSchema.methods.userJSON = function (token) {
     name: this.name,
     email: this.email,
     bio: this.bio,
+    token: token,
   };
 };
 userSchema.methods.userJSON1 = function (user) {
@@ -59,6 +60,16 @@ userSchema.methods.userJSON1 = function (user) {
   };
 };
 
+userSchema.methods.followingJSON = function (user) {
+  console.log(user, 'abhishekkkk', this);
+  return {
+    username: user.username,
+    bio: user.bio,
+    email: user.email,
+    following: user.followers.includes(this._id),
+    image: user.image,
+  };
+};
 var User = mongoose.model('User', userSchema);
 
 module.exports = User;
