@@ -20,6 +20,25 @@ router.post('/', auth.verifyToken, async (req, res, next) => {
   }
 });
 
+// feed
+
+router.get('/feed', auth.verifyToken, async (req, res, next) => {
+  let loggedinUserId = req.user.userId;
+
+  try {
+    var user = await User.findById(loggedinUserId);
+    var article = await Article.find({ author: { $in: user.followings } })
+      .sort({ createdAt: -1 })
+      .populate('author', 'username bio image');
+
+    res.json({
+      articles: article,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // update article
 
 router.put('/:slug', auth.verifyToken, async (req, res, next) => {
@@ -100,9 +119,9 @@ router.get('/', async (req, res, next) => {
     var articles = await Article.find(query)
       .sort({ createdAt: -1 })
       .populate('author', 'username bio image');
-    res.json({ articles }).limit(limit).skip(offset);
+    return res.json({ articles }).limit(limit).skip(offset);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 });
 
@@ -140,6 +159,55 @@ router.get('/:slug/comments', async (req, res, next) => {
   }
 });
 
+router.post('/:slug/favorite', auth.verifyToken, async (req, res, next) => {
+  let slug = req.params.slug;
+  let loggedinUser = req.user.userId;
+
+  try {
+    var article = await Article.findOne({ slug: slug }).populate(
+      'author',
+      'username bio image following'
+    );
+    if (!article.favouritedBy.includes(loggedinUser)) {
+      article.favouritedBy.push(loggedinUser);
+      article.favoorited = true;
+      article.favoritesCount += 1;
+      article.save();
+
+      res.json({
+        article: article,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+// unfavorite article
+
+router.delete('/:slug/favorite', auth.verifyToken, async (req, res, next) => {
+  let slug = req.params.slug;
+  let loggedinUser = req.user.userId;
+
+  try {
+    var article = await Article.findOne({ slug: slug }).populate(
+      'author',
+      'username bio image following'
+    );
+    if (article.favouritedBy.includes(loggedinUser)) {
+      article.favouritedBy.pull(loggedinUser);
+      article.favoorited = false;
+      article.favoritesCount -= 1;
+      article.save();
+
+      res.json({
+        article: article,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 // delete article
 
 router.delete('/:slug', auth.verifyToken, async (req, res, next) => {
@@ -161,4 +229,5 @@ router.delete('/:slug', auth.verifyToken, async (req, res, next) => {
     return next(error);
   }
 });
+
 module.exports = router;
