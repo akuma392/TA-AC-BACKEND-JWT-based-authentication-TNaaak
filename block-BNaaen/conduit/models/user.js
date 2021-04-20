@@ -61,7 +61,7 @@ userSchema.methods.userJSON1 = function (user) {
 };
 
 userSchema.methods.followingJSON = function (user) {
-  console.log(user, 'abhishekkkk', this);
+  
   return {
     username: user.username,
     bio: user.bio,
