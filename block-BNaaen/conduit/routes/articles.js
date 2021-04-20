@@ -118,8 +118,10 @@ router.get('/', async (req, res, next) => {
   try {
     var articles = await Article.find(query)
       .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip(offset)
       .populate('author', 'username bio image');
-    return res.json({ articles }).limit(limit).skip(offset);
+    return res.json({ articles });
   } catch (error) {
     return next(error);
   }
@@ -194,8 +196,9 @@ router.delete('/:slug/favorite', auth.verifyToken, async (req, res, next) => {
 
   try {
     var article = await Article.findOne({ slug: slug })
-      .populate('author', 'username bio image following')
+      .populate('author')
       .exec();
+    console.log(article, 'articleeeeee');
     if (article.favouritedBy.includes(loggedinUser)) {
       article.favouritedBy.pull(loggedinUser);
 
